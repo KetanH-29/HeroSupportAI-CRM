@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeroSupportAI — Ticket Details</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    body { font-family: 'Inter', sans-serif; }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen relative overflow-x-hidden">
+
+  <!-- Ambient Background -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.1)_0%,transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/90 to-slate-950"></div>
+  </div>
+
+  <div class="relative z-10 min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <a href="/dashboard" class="p-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 transition-all">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            </a>
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 p-0.5 flex items-center justify-center">
+                <i data-lucide="brain-circuit" class="w-4 h-4 text-white"></i>
+              </div>
+              <div>
+                <span id="header-ticket-id" class="text-lg font-display font-bold text-white font-mono">TKT-000</span>
+                <span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">Agent View</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span id="badge-priority" class="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-300">Loading...</span>
+            <span id="badge-status" class="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-300">Loading...</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Detail Content -->
+    <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- Left Column: Ticket Info + AI Triage Analysis (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+
+          <!-- 1. AI Triage Intelligence Card -->
+          <div class="glass-card rounded-2xl p-6 border border-purple-500/30 shadow-xl relative overflow-hidden">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-sm font-display font-bold text-purple-300 uppercase tracking-wider">AI Triage Intelligence</h3>
+              <span class="text-[10px] font-mono text-slate-500 ml-auto">Groq LLaMA 3.3 70B</span>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <div class="text-[11px] font-mono text-slate-400 mb-1 uppercase">Executive 1-Sentence Summary</div>
+                <div id="ai-summary" class="text-sm text-white font-medium bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 leading-relaxed">
+                  Analyzing ticket...
+                </div>
+              </div>
+
+              <div>
+                <div class="text-[11px] font-mono text-slate-400 mb-1 uppercase">AI Priority Reasoning</div>
+                <div id="ai-reason" class="text-xs text-slate-300 bg-slate-900/60 p-3 rounded-xl border border-slate-800 leading-relaxed">
+                  Loading reasoning...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Customer Complaint Details -->
+          <div class="glass-card rounded-2xl p-6 border border-slate-800 shadow-xl">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+              <h3 class="text-base font-display font-bold text-white">Original Customer Request</h3>
+              <span id="ticket-created" class="text-xs font-mono text-slate-500">—</span>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <div class="text-[11px] font-mono text-slate-400 uppercase mb-1">Subject</div>
+                <h2 id="ticket-subject" class="text-lg font-bold text-white">—</h2>
+              </div>
+
+              <div>
+                <div class="text-[11px] font-mono text-slate-400 uppercase mb-1">Customer Details</div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+                  <div class="w-8 h-8 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <div id="customer-name" class="text-sm font-semibold text-white">—</div>
+                    <div id="customer-email" class="text-xs text-slate-400 font-mono">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-[11px] font-mono text-slate-400 uppercase mb-1">Customer Description</div>
+                <div id="ticket-description" class="text-sm text-slate-300 leading-relaxed bg-slate-900/50 p-4 rounded-xl border border-slate-800/80 whitespace-pre-line">
+                  —
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Status Update + Internal Notes (5 cols) -->
+        <div class="lg:col-span-5 space-y-6">
+
+          <!-- 1. Quick Status & Priority Update -->
+          <div class="glass-card rounded-2xl p-6 border border-slate-800 shadow-xl">
+            <h3 class="text-base font-display font-bold text-white mb-4">Update Ticket</h3>
+
+            <form onsubmit="handleUpdate(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1.5" for="status-select">Status</label>
+                <select id="status-select" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1.5" for="priority-select">AI Priority Override</label>
+                <select id="priority-select" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                  <option value="URGENT">🔴 URGENT</option>
+                  <option value="HIGH">🟠 HIGH</option>
+                  <option value="MEDIUM">🔵 MEDIUM</option>
+                  <option value="LOW">⚪ LOW</option>
+                </select>
+              </div>
+
+              <button type="submit" id="btn-save" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Save Changes</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- 2. Internal Staff Notes Timeline -->
+          <div class="glass-card rounded-2xl p-6 border border-slate-800 shadow-xl">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <i data-lucide="message-square" class="w-4 h-4 text-indigo-400"></i>
+                <h3 class="text-base font-display font-bold text-white">Internal Agent Notes</h3>
+              </div>
+              <span id="notes-count" class="text-xs font-mono text-slate-500">0 notes</span>
+            </div>
+
+            <!-- Notes List -->
+            <div id="notes-timeline" class="space-y-3 mb-4 max-h-64 overflow-y-auto pr-1">
+              <div class="text-xs text-slate-500 italic text-center py-4">No internal notes yet.</div>
+            </div>
+
+            <!-- Add Note Form -->
+            <form onsubmit="handleAddNote(event)" class="space-y-3 pt-3 border-t border-slate-800">
+              <textarea id="new-note-text" rows="2" required placeholder="Add private resolution note or webhook trace..."
+                        class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all resize-none"></textarea>
+              <button type="submit" class="w-full py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs transition-all flex items-center justify-center gap-2">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Add Note</span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    lucide.createIcons();
+
+    // Extract ticket ID from URL path: /tickets/TKT-001
+    const pathParts = window.location.pathname.split('/');
+    const ticketId = pathParts[pathParts.length - 1];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadTicketDetails();
+    });
+
+    async function loadTicketDetails() {
+      try {
+        const res = await fetch(`/api/tickets/${ticketId}`);
+        if (!res.ok) throw new Error('Ticket not found');
+        const ticket = await res.json();
+
+        // Header & Core
+        document.getElementById('header-ticket-id').textContent = ticket.ticket_id;
+        document.getElementById('ticket-subject').textContent = ticket.subject;
+        document.getElementById('customer-name').textContent = ticket.customer_name;
+        document.getElementById('customer-email').textContent = ticket.customer_email;
+        document.getElementById('ticket-description').textContent = ticket.description;
+        document.getElementById('ticket-created').textContent = new Date(ticket.created_at).toLocaleString();
+
+        // AI Section
+        document.getElementById('ai-summary').textContent = ticket.ai_summary || 'No summary available.';
+        document.getElementById('ai-reason').textContent = ticket.ai_priority_reason || 'Standard priority scoring.';
+
+        // Status & Priority Selects
+        document.getElementById('status-select').value = ticket.status;
+        document.getElementById('priority-select').value = ticket.ai_priority || 'MEDIUM';
+
+        // Badges
+        updateBadges(ticket.ai_priority, ticket.status);
+
+        // Notes
+        renderNotes(ticket.notes || []);
+
+      } catch (err) {
+        alert('Error loading ticket: ' + err.message);
+        window.location.href = '/dashboard';
+      }
+    }
+
+    function updateBadges(priority, status) {
+      const priorityEl = document.getElementById('badge-priority');
+      const statusEl = document.getElementById('badge-status');
+
+      // Priority styling
+      if (priority === 'URGENT') {
+        priorityEl.className = "px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20";
+        priorityEl.textContent = "🔴 URGENT";
+      } else if (priority === 'HIGH') {
+        priorityEl.className = "px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20";
+        priorityEl.textContent = "🟠 HIGH";
+      } else {
+        priorityEl.className = "px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20";
+        priorityEl.textContent = "🔵 " + (priority || "NORMAL");
+      }
+
+      // Status styling
+      if (status === 'Open') {
+        statusEl.className = "px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20";
+        statusEl.textContent = "Open";
+      } else if (status === 'In Progress') {
+        statusEl.className = "px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+        statusEl.textContent = "In Progress";
+      } else {
+        statusEl.className = "px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        statusEl.textContent = "Closed";
+      }
+    }
+
+    function renderNotes(notes) {
+      const container = document.getElementById('notes-timeline');
+      document.getElementById('notes-count').textContent = `${notes.length} note${notes.length === 1 ? '' : 's'}`;
+
+      if (notes.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-500 italic text-center py-4">No internal notes yet.</div>';
+        return;
+      }
+
+      container.innerHTML = notes.map(note => {
+        const time = new Date(note.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
+            <div class="flex items-center justify-between text-[10px] text-slate-500 mb-1 font-mono">
+              <span class="text-indigo-400 font-bold">Staff Note</span>
+              <span>${time}</span>
+            </div>
+            <div>${note.note_text}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleUpdate(e) {
+      e.preventDefault();
+      const status = document.getElementById('status-select').value;
+      const priority = document.getElementById('priority-select').value;
+      const btn = document.getElementById('btn-save');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Saving...</span>';
+
+      try {
+        const res = await fetch(`/api/tickets/${ticketId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, priority })
+        });
+        if (!res.ok) throw new Error('Failed to update ticket');
+
+        // Reload details
+        await loadTicketDetails();
+      } catch (err) {
+        alert('Error updating ticket: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i><span>Save Changes</span>';
+        lucide.createIcons();
+      }
+    }
+
+    async function handleAddNote(e) {
+      e.preventDefault();
+      const textarea = document.getElementById('new-note-text');
+      const note = textarea.value.trim();
+      if (!note) return;
+
+      try {
+        const res = await fetch(`/api/tickets/${ticketId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note })
+        });
+        if (!res.ok) throw new Error('Failed to add note');
+
+        textarea.value = '';
+        await loadTicketDetails();
+      } catch (err) {
+        alert('Error adding note: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

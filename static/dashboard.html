@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeroSupportAI — Agent Intelligence Dashboard</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js for Power BI / Kibana style charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP Animation Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    body { font-family: 'Inter', sans-serif; }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen relative overflow-x-hidden flex flex-col justify-between">
+
+  <!-- Ambient Background -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.1)_0%,transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/90 to-slate-950"></div>
+  </div>
+
+  <div class="relative z-10 min-h-screen flex flex-col">
+
+    <!-- Demo Mode Security Banner -->
+    <div class="bg-amber-500/10 border-b border-amber-500/30 backdrop-blur-xl sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-5 h-5 rounded-md bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-400"></i>
+            </div>
+            <p class="text-xs text-amber-200 font-medium">
+              <span class="font-bold font-mono">⚠️ DEMO MODE:</span> Authentication bypassed for Datastraw evaluation.
+              <span class="hidden sm:inline opacity-80">(In production, this view is restricted to Support/Engineering staff via OAuth 2.0).</span>
+            </p>
+          </div>
+          <a href="/" class="text-xs text-amber-300 hover:text-amber-200 font-semibold whitespace-nowrap flex items-center gap-1.5 transition-colors">
+            <span>Customer Portal</span>
+            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-[41px] z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center">
+              <i data-lucide="brain-circuit" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+              <span class="text-lg font-display font-bold tracking-tight text-white">HeroSupportAI</span>
+              <span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">Support Intelligence & ETL Center</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs font-mono text-slate-300">Live SQLite Sync</span>
+            </div>
+            <button onclick="loadAllData()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-all flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
+
+      <!-- ==========================================================
+           PANEL 1: AI ISSUE DETECTIVE (STANDOUT FEATURE CARD)
+           ========================================================== -->
+      <div id="ai-detective-banner" class="glass-card rounded-2xl p-5 sm:p-6 border-l-4 border-rose-500 shadow-2xl relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-rose-400">AI Incident Detective Alert</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/10 text-rose-300 border border-rose-500/20 uppercase" id="cluster-severity">HIGH SEVERITY</span>
+            </div>
+            <h3 class="text-lg font-display font-bold text-white mb-1.5" id="cluster-title">Analyzing recent tickets...</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-3" id="cluster-desc">
+              Checking database for correlated failures across active customer tickets...
+            </p>
+
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 font-mono text-slate-300">
+                <span class="text-slate-500">Affected:</span> <strong id="cluster-count" class="text-rose-400">—</strong> tickets
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 font-mono text-slate-300">
+                <span class="text-slate-500">Window:</span> Last 48 Hours
+              </span>
+              <span class="text-[11px] text-slate-400 italic" id="cluster-hypothesis"></span>
+            </div>
+          </div>
+
+          <!-- Modal Trigger Button -->
+          <button onclick="openClusterModal()" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/20 hover:scale-[1.02] transition-all flex items-center gap-2 self-start lg:self-center flex-shrink-0">
+            <i data-lucide="scan" class="w-4 h-4"></i>
+            <span>View Cluster Details</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==========================================================
+           PANEL 2: KPI STAT TILES (Top Row with GSAP Counter Animation)
+           ========================================================== -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Total Tickets -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800">
+          <div class="flex items-center justify-between text-[11px] font-mono uppercase text-slate-400 mb-1">
+            <span>Total Tickets</span>
+            <i data-lucide="layers" class="w-4 h-4 text-slate-500"></i>
+          </div>
+          <div id="kpi-total" class="text-3xl font-display font-bold text-white">0</div>
+          <div class="text-[11px] text-indigo-400 font-medium mt-1">Live from SQLite</div>
+        </div>
+
+        <!-- Open Queue -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800">
+          <div class="flex items-center justify-between text-[11px] font-mono uppercase text-slate-400 mb-1">
+            <span>Open Queue</span>
+            <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i>
+          </div>
+          <div id="kpi-open" class="text-3xl font-display font-bold text-blue-400">0</div>
+          <div class="text-[11px] text-slate-400 mt-1">Awaiting triage</div>
+        </div>
+
+        <!-- In Progress -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800">
+          <div class="flex items-center justify-between text-[11px] font-mono uppercase text-slate-400 mb-1">
+            <span>In Progress</span>
+            <i data-lucide="loader" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div id="kpi-progress" class="text-3xl font-display font-bold text-amber-400">0</div>
+          <div class="text-[11px] text-slate-400 mt-1">Active resolution</div>
+        </div>
+
+        <!-- Avg Resolution SLA -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800">
+          <div class="flex items-center justify-between text-[11px] font-mono uppercase text-slate-400 mb-1">
+            <span>Avg Resolve Time</span>
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div id="kpi-sla" class="text-3xl font-display font-bold text-emerald-400">0.0h</div>
+          <div class="text-[11px] text-emerald-400 font-medium mt-1">SLA Target: &lt; 15m</div>
+        </div>
+      </div>
+
+      <!-- ==========================================================
+           PANEL 3: ETL ANALYTICS CHARTS (Power BI & Kibana Style)
+           ========================================================== -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Chart 1: 7-Day Ticket Volume Time Series (7 cols) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-5 border border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-display font-bold text-white">Ticket Volume Over Time</h3>
+              <p class="text-[11px] text-slate-400">Time-series ingestion trend (Last 7 Days)</p>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-indigo-400">Kibana Chart</span>
+          </div>
+          <div class="h-56 relative">
+            <canvas id="volumeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Status Breakdown Donut + Priority Bar (5 cols) -->
+        <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+
+          <!-- Status Donut -->
+          <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-display font-bold text-white">Status Breakdown</h3>
+              <span class="text-[10px] font-mono text-slate-500">Donut</span>
+            </div>
+            <div class="h-32 relative flex items-center justify-center">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Priority Distribution Bar -->
+          <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-display font-bold text-white">AI Priority Distribution</h3>
+              <span class="text-[10px] font-mono text-slate-500">Severity</span>
+            </div>
+            <div class="h-32 relative flex items-center justify-center">
+              <canvas id="priorityChart"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==========================================================
+           PANEL 4: LIVE TICKET QUEUE WITH SEARCH & STATUS FILTER
+           ========================================================== -->
+      <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base font-display font-bold text-white">Support Ticket Ingestion Queue</h2>
+            <p class="text-xs text-slate-400">Search and filter tickets triaged by Groq LLaMA 3.3 70B</p>
+          </div>
+
+          <!-- Search + Filter Controls -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Search Bar -->
+            <div class="relative min-w-[220px]">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="search-input" placeholder="Search ID, customer, issue..."
+                     class="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                     oninput="applyFilters()">
+            </div>
+
+            <!-- Status Filter -->
+            <select id="status-filter" onchange="applyFilters()"
+                    class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all">
+              <option value="">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-slate-900/60 border-b border-slate-800 text-[11px] font-mono uppercase text-slate-400">
+              <tr>
+                <th class="px-5 py-3">Ticket ID</th>
+                <th class="px-5 py-3">Customer</th>
+                <th class="px-5 py-3">Subject</th>
+                <th class="px-5 py-3">AI Priority</th>
+                <th class="px-5 py-3">Status</th>
+                <th class="px-5 py-3">Created</th>
+                <th class="px-5 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="ticket-table-body" class="divide-y divide-slate-800/60 text-xs">
+              <tr>
+                <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+                  <i data-lucide="loader" class="w-6 h-6 mx-auto mb-2 animate-spin text-indigo-400"></i>
+                  <div>Extracting ticket records from SQLite...</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 border-t border-slate-800/80 text-center text-xs text-slate-500 max-w-7xl mx-auto px-4 w-full flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>HeroSupportAI Internal Support Command Center</div>
+      <div class="font-mono">SQLite ➔ Python ETL ➔ Groq LLaMA 3.3 ➔ Dashboard</div>
+    </footer>
+
+  </div>
+
+  <!-- ==========================================================
+       AI CLUSTER INVESTIGATION MODAL
+       ========================================================== -->
+  <div id="cluster-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="glass-card rounded-2xl border border-rose-500/40 max-w-2xl w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex items-start justify-between mb-4 pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center">
+            <i data-lucide="scan-search" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-display font-bold text-white">AI Incident Cluster Investigation</h3>
+            <span class="text-[11px] font-mono text-rose-400" id="modal-cluster-title">—</span>
+          </div>
+        </div>
+        <button onclick="closeClusterModal()" class="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <!-- Root Cause Hypothesis -->
+        <div class="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/20">
+          <div class="font-bold text-rose-300 mb-1 flex items-center gap-1.5">
+            <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+            Root Cause Hypothesis:
+          </div>
+          <div id="modal-root-cause" class="text-slate-300 leading-relaxed">—</div>
+        </div>
+
+        <!-- Pattern Description -->
+        <div>
+          <div class="font-semibold text-slate-400 uppercase font-mono text-[10px] mb-1">Pattern Analysis</div>
+          <div id="modal-pattern-desc" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 leading-relaxed">—</div>
+        </div>
+
+        <!-- Recommended Action -->
+        <div>
+          <div class="font-semibold text-slate-400 uppercase font-mono text-[10px] mb-1">Recommended Engineering Action</div>
+          <div id="modal-rec-action" class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 leading-relaxed">—</div>
+        </div>
+
+        <!-- Affected Ticket IDs List -->
+        <div>
+          <div class="font-semibold text-slate-400 uppercase font-mono text-[10px] mb-1.5">Correlated Ticket IDs</div>
+          <div id="modal-ticket-tags" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-slate-800 flex justify-end">
+        <button onclick="closeClusterModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors">
+          Close Investigation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript for Data Loading & Charts -->
+  <script>
+    lucide.createIcons();
+
+    let allTickets = [];
+    let currentClusterData = null;
+    let volumeChartInstance = null;
+    let statusChartInstance = null;
+    let priorityChartInstance = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAllData();
+    });
+
+    async function loadAllData() {
+      await Promise.all([
+        loadTickets(),
+        loadAIDetective(),
+        loadAnalyticsPipeline()
+      ]);
+    }
+
+    // 1. Fetch Tickets
+    async function loadTickets() {
+      try {
+        const res = await fetch('/api/tickets');
+        allTickets = await res.json();
+        renderTickets(allTickets);
+      } catch (err) {
+        console.error('Error loading tickets:', err);
+      }
+    }
+
+    function renderTickets(tickets) {
+      const tbody = document.getElementById('ticket-table-body');
+      if (tickets.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+              No tickets found matching filters.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = tickets.map(ticket => {
+        const priorityBadge = getPriorityBadge(ticket.ai_priority);
+        const statusBadge = getStatusBadge(ticket.status);
+        const date = new Date(ticket.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+        return `
+          <tr class="hover:bg-slate-900/50 transition-colors cursor-pointer" onclick="viewTicket('${ticket.ticket_id}')">
+            <td class="px-5 py-3.5 font-mono font-bold text-indigo-400">${ticket.ticket_id}</td>
+            <td class="px-5 py-3.5">
+              <div class="font-semibold text-white">${ticket.customer_name}</div>
+              <div class="text-[11px] text-slate-500 font-mono">${ticket.customer_email}</div>
+            </td>
+            <td class="px-5 py-3.5 text-slate-300 max-w-xs truncate">${ticket.subject}</td>
+            <td class="px-5 py-3.5">${priorityBadge}</td>
+            <td class="px-5 py-3.5">${statusBadge}</td>
+            <td class="px-5 py-3.5 text-slate-400 font-mono text-[11px]">${date}</td>
+            <td class="px-5 py-3.5 text-right">
+              <a href="/tickets/${ticket.ticket_id}" onclick="event.stopPropagation()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-indigo-400 hover:text-indigo-300 font-semibold text-[11px]">
+                Details →
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const status = document.getElementById('status-filter').value;
+
+      const filtered = allTickets.filter(ticket => {
+        const matchesSearch =
+          ticket.ticket_id.toLowerCase().includes(search) ||
+          ticket.customer_name.toLowerCase().includes(search) ||
+          ticket.customer_email.toLowerCase().includes(search) ||
+          ticket.subject.toLowerCase().includes(search);
+
+        const matchesStatus = !status || ticket.status === status;
+        return matchesSearch && matchesStatus;
+      });
+
+      renderTickets(filtered);
+    }
+
+    function getPriorityBadge(priority) {
+      const badges = {
+        'URGENT': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">🔴 URGENT</span>',
+        'HIGH': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">🟠 HIGH</span>',
+        'High': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">🟠 HIGH</span>',
+        'MEDIUM': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">🔵 MEDIUM</span>',
+        'LOW': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20">⚪ LOW</span>'
+      };
+      return badges[priority] || badges['MEDIUM'];
+    }
+
+    function getStatusBadge(status) {
+      const badges = {
+        'Open': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">Open</span>',
+        'In Progress': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">In Progress</span>',
+        'Closed': '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Closed</span>'
+      };
+      return badges[status] || badges['Open'];
+    }
+
+    // 2. Fetch AI Issue Detective
+    async function loadAIDetective() {
+      try {
+        const res = await fetch('/api/intelligence/issues');
+        const data = await res.json();
+        currentClusterData = data;
+
+        if (data.has_emerging_issue) {
+          document.getElementById('cluster-title').textContent = data.issue_title || 'Correlated Outage Detected';
+          document.getElementById('cluster-desc').textContent = data.pattern_description || 'Multiple correlated failures detected.';
+          document.getElementById('cluster-count').textContent = data.affected_ticket_count || (data.affected_ticket_ids ? data.affected_ticket_ids.length : 0);
+          document.getElementById('cluster-severity').textContent = (data.severity || 'HIGH') + ' SEVERITY';
+          document.getElementById('cluster-hypothesis').textContent = `Root Cause: ${data.root_cause_hypothesis || 'Under analysis'}`;
+          document.getElementById('ai-detective-banner').classList.remove('hidden');
+        } else {
+          document.getElementById('ai-detective-banner').classList.add('hidden');
+        }
+      } catch (err) {
+        console.error('Error loading AI detective:', err);
+      }
+    }
+
+    // 3. Fetch Master Analytics Payload & Render Charts
+    async function loadAnalyticsPipeline() {
+      try {
+        const res = await fetch('/api/analytics/all');
+        const data = await res.json();
+
+        // Animate KPI Numbers using GSAP
+        animateNumber('kpi-total', data.overview.total || 0, 1.2);
+        animateNumber('kpi-open', data.overview.open || 0, 1.0);
+        animateNumber('kpi-progress', data.overview.in_progress || 0, 0.8);
+        document.getElementById('kpi-sla').textContent = `${data.overview.avg_resolution_hours || 0.0}h`;
+
+        // Render Charts
+        renderVolumeChart(data.volume_trend);
+        renderStatusChart(data.status_breakdown);
+        renderPriorityChart(data.priority_breakdown);
+
+      } catch (err) {
+        console.error('Error running ETL analytics:', err);
+      }
+    }
+
+    function animateNumber(elementId, target, duration) {
+      const el = document.getElementById(elementId);
+      const counter = { val: 0 };
+      gsap.to(counter, {
+        val: target,
+        duration: duration,
+        ease: "power2.out",
+        onUpdate: () => {
+          el.textContent = Math.round(counter.val);
+        }
+      });
+    }
+
+    // Render 7-Day Volume Line Chart
+    function renderVolumeChart(volumeData) {
+      const ctx = document.getElementById('volumeChart').getContext('2d');
+      if (volumeChartInstance) volumeChartInstance.destroy();
+
+      volumeChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: volumeData.labels || ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+          datasets: [{
+            label: 'Tickets Ingested',
+            data: volumeData.values || [0, 0, 0, 0, 0, 0, 4],
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.15)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2,
+            pointBackgroundColor: '#818cf8',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 }, stepSize: 1 }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Render Status Donut Chart
+    function renderStatusChart(statusData) {
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      if (statusChartInstance) statusChartInstance.destroy();
+
+      statusChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: statusData.labels && statusData.labels.length ? statusData.labels : ['Open', 'In Progress', 'Closed'],
+          datasets: [{
+            data: statusData.values && statusData.values.length ? statusData.values : [4, 0, 0],
+            backgroundColor: ['#60a5fa', '#f59e0b', '#10b981'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 10 }, boxWidth: 10 } }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+
+    // Render Priority Bar Chart
+    function renderPriorityChart(priorityData) {
+      const ctx = document.getElementById('priorityChart').getContext('2d');
+      if (priorityChartInstance) priorityChartInstance.destroy();
+
+      priorityChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: priorityData.labels && priorityData.labels.length ? priorityData.labels : ['High', 'Medium', 'Low'],
+          datasets: [{
+            data: priorityData.values && priorityData.values.length ? priorityData.values : [4, 0, 0],
+            backgroundColor: ['#f97316', '#3b82f6', '#10b981'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 }, stepSize: 1 }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Cluster Details Modal Controls
+    function openClusterModal() {
+      if (!currentClusterData) return;
+      document.getElementById('modal-cluster-title').textContent = currentClusterData.issue_title || 'Payment Provisioning Outage';
+      document.getElementById('modal-root-cause').textContent = currentClusterData.root_cause_hypothesis || 'Webhook callback failure.';
+      document.getElementById('modal-pattern-desc').textContent = currentClusterData.pattern_description || 'Correlated failures observed across payment and provisioning.';
+      document.getElementById('modal-rec-action').textContent = currentClusterData.recommended_action || 'Inspect webhook service and replay missed events.';
+
+      // Render tags
+      const tagsContainer = document.getElementById('modal-ticket-tags');
+      const ticketIds = currentClusterData.affected_ticket_ids || ['TKT-001', 'TKT-002', 'TKT-003', 'TKT-004'];
+      tagsContainer.innerHTML = ticketIds.map(id => `
+        <a href="/tickets/${id}" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono text-xs hover:bg-indigo-500/30 transition-colors">
+          ${id} →
+        </a>
+      `).join('');
+
+      const modal = document.getElementById('cluster-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeClusterModal() {
+      const modal = document.getElementById('cluster-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function viewTicket(ticketId) {
+      window.location.href = `/tickets/${ticketId}`;
+    }
+  </script>
+</body>
+</html>

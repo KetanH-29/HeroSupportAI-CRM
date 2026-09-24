@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeroSupportAI — Customer Support Portal</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP Animation Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    body { font-family: 'Inter', sans-serif; }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .clip-text {
+      background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen relative overflow-x-hidden flex flex-col justify-between">
+
+  <!-- Background Vignette -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.12)_0%,transparent_60%)]"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/90 to-slate-950"></div>
+  </div>
+
+  <!-- Container -->
+  <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col flex-1">
+
+    <!-- Header Navigation -->
+    <header class="py-6 flex items-center justify-between border-b border-slate-800/80">
+      <div class="flex items-center gap-3">
+        <!-- Brand Logo: Brain + Neural Network -->
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center relative overflow-hidden group cursor-pointer hover:scale-105 transition-transform">
+          <i data-lucide="brain-circuit" class="w-5 h-5 text-white relative z-10"></i>
+        </div>
+        <div>
+          <span class="text-xl font-display font-bold tracking-tight text-white">HeroSupportAI</span>
+          <span class="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">Customer Help Center</span>
+        </div>
+      </div>
+
+      <!-- Agent / Developer Switcher Button -->
+      <nav class="flex items-center gap-4">
+        <a href="/dashboard" class="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-700/70 hover:border-indigo-500/50 text-slate-300 hover:text-white text-xs font-semibold transition-all shadow-md">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Agent / Staff Portal</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i>
+        </a>
+      </nav>
+    </header>
+
+    <!-- Main Content: Customer Support Hub -->
+    <main class="py-12 sm:py-16 flex flex-col items-center">
+
+      <!-- Hero Pitch -->
+      <div class="text-center max-w-2xl mx-auto mb-12 gsap-hero">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-mono font-semibold mb-4">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 24/7 AI-Assisted Support Center
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-display font-bold text-white tracking-tight leading-tight mb-4">
+          How can we <span class="clip-text">help you today?</span>
+        </h1>
+        <p class="text-sm sm:text-base text-slate-400">
+          Submit your issue below. Our AI engine instantly analyzes, prioritizes, and routes your request to our engineering team in seconds.
+        </p>
+      </div>
+
+      <!-- Two Main Customer Actions Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-5xl items-start">
+
+        <!-- Left Column: Submit Ticket Form (7 cols) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-2xl relative gsap-card">
+          <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              </div>
+              <h2 class="text-lg font-display font-bold text-white">Raise a Support Ticket</h2>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800">⚡ Instant AI Triage</span>
+          </div>
+
+          <!-- Submission Form -->
+          <form id="ticket-form" onsubmit="handleTicketSubmit(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Full Name -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="customer_name">Your Full Name <span class="text-rose-400">*</span></label>
+                <input type="text" id="customer_name" required placeholder="e.g. Rahul Sharma"
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+              </div>
+
+              <!-- Email Address -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="customer_email">Email Address <span class="text-rose-400">*</span></label>
+                <input type="email" id="customer_email" required placeholder="e.g. rahul@example.com"
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+              </div>
+            </div>
+
+            <!-- Subject -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="subject">Issue Subject / Summary <span class="text-rose-400">*</span></label>
+              <input type="text" id="subject" required placeholder="e.g. Payment deducted via UPI but subscription not active"
+                     class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="description">Detailed Description <span class="text-rose-400">*</span></label>
+              <textarea id="description" rows="4" required placeholder="Please provide details (transaction ID, steps taken, error messages, etc.)..."
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submit-btn" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-size-200 text-white font-semibold text-sm shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+              <span id="btn-text">Submit Support Request</span>
+              <i data-lucide="send" id="btn-icon" class="w-4 h-4"></i>
+            </button>
+          </form>
+
+          <!-- Success Alert Message (Hidden initially) -->
+          <div id="success-card" class="hidden mt-6 p-5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 animate-in fade-in zoom-in-95 duration-300">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-sm font-bold text-white">Ticket Submitted Successfully!</h3>
+                  <span id="res-ticket-id" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">TKT-001</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">
+                  Our AI engine has triaged your issue with priority <span id="res-priority" class="font-bold text-white px-1.5 py-0.5 rounded bg-slate-900 border text-[11px]">HIGH</span>.
+                </p>
+                <div class="mt-2.5 p-2.5 rounded bg-slate-900/80 border border-slate-800 text-[11px] text-slate-300 font-mono">
+                  <span class="text-slate-500">AI Summary:</span> <span id="res-summary">...</span>
+                </div>
+                <div class="mt-3 flex items-center gap-3">
+                  <button onclick="resetForm()" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline">
+                    + Submit another issue
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Track Ticket Status & Quick Help (5 cols) -->
+        <div class="lg:col-span-5 space-y-6 gsap-card">
+
+          <!-- 1. Track Existing Ticket Box -->
+          <div class="glass-card rounded-2xl p-6 border border-slate-800 shadow-xl">
+            <div class="flex items-center gap-2.5 mb-4">
+              <div class="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                <i data-lucide="search" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-base font-display font-bold text-white">Track Your Ticket</h3>
+            </div>
+            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+              Already submitted a ticket? Enter your Ticket ID below to check live resolution status.
+            </p>
+
+            <form onsubmit="handleLookup(event)" class="space-y-3">
+              <div class="flex gap-2">
+                <input type="text" id="lookup_id" required placeholder="e.g. TKT-001"
+                       class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm font-mono text-white uppercase placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all">
+                <button type="submit" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition-all">
+                  Lookup
+                </button>
+              </div>
+            </form>
+
+            <!-- Lookup Result Box (Hidden initially) -->
+            <div id="lookup-result" class="hidden mt-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
+              <div class="flex items-center justify-between mb-2">
+                <span id="lk-id" class="font-mono font-bold text-indigo-400">TKT-001</span>
+                <span id="lk-status" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">Open</span>
+              </div>
+              <div id="lk-subject" class="font-semibold text-white mb-1 line-clamp-1">Payment deducted</div>
+              <div id="lk-date" class="text-[11px] text-slate-500 mb-2">Created 2 hours ago</div>
+              <div class="p-2 rounded bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+                <span class="text-slate-500">Status Note:</span> <span id="lk-summary">Assigned to agent queue.</span>
+              </div>
+            </div>
+
+            <div id="lookup-error" class="hidden mt-4 p-3 rounded-xl bg-rose-950/50 border border-rose-500/30 text-xs text-rose-300">
+              Ticket not found. Please verify your Ticket ID (format: TKT-001).
+            </div>
+          </div>
+
+          <!-- 2. Customer Trust & SLA Guarantees -->
+          <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-3.5">
+            <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Support Commitments</h4>
+
+            <div class="flex items-start gap-3 text-xs text-slate-300">
+              <i data-lucide="zap" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <span class="font-semibold text-white">Instant AI Triage:</span> Every ticket is reviewed and routed in &lt;1 second.
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 text-xs text-slate-300">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <span class="font-semibold text-white">Priority SLA:</span> Critical payment issues escalated to senior engineers immediately.
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 text-xs text-slate-300">
+              <i data-lucide="clock" class="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <span class="font-semibold text-white">Average Resolution:</span> Under 2 hours during active support cycles.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 border-t border-slate-800/80 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-bold text-slate-300">HeroSupportAI</span>
+        <span>•</span>
+        <span>Customer Support Portal</span>
+      </div>
+      <div>
+        Staff member? <a href="/dashboard" class="text-indigo-400 hover:text-indigo-300 font-semibold underline ml-1">Launch Agent Dashboard →</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Client-Side JavaScript -->
+  <script>
+    lucide.createIcons();
+
+    // Entrance Animation
+    gsap.from(".gsap-hero", { opacity: 0, y: 25, duration: 0.8, ease: "power3.out" });
+    gsap.from(".gsap-card", { opacity: 0, y: 35, duration: 0.8, stagger: 0.15, ease: "power3.out", delay: 0.2 });
+
+    // Ticket Submission Handler
+    async function handleTicketSubmit(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById("submit-btn");
+      const btnText = document.getElementById("btn-text");
+
+      const payload = {
+        customer_name: document.getElementById("customer_name").value.trim(),
+        customer_email: document.getElementById("customer_email").value.trim(),
+        subject: document.getElementById("subject").value.trim(),
+        description: document.getElementById("description").value.trim()
+      };
+
+      // Loading state
+      submitBtn.disabled = true;
+      btnText.textContent = "AI Triaging & Submitting...";
+      submitBtn.classList.add("opacity-75");
+
+      try {
+        const res = await fetch("/api/tickets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error("Failed to submit ticket");
+        const data = await res.json();
+
+        // Show success
+        document.getElementById("ticket-form").classList.add("hidden");
+        document.getElementById("res-ticket-id").textContent = data.ticket_id;
+        document.getElementById("res-priority").textContent = data.ai_priority || "NORMAL";
+        document.getElementById("res-summary").textContent = data.ai_summary || "Ticket received and logged.";
+        document.getElementById("success-card").classList.remove("hidden");
+        lucide.createIcons();
+      } catch (err) {
+        alert("Error submitting ticket: " + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = "Submit Support Request";
+        submitBtn.classList.remove("opacity-75");
+      }
+    }
+
+    function resetForm() {
+      document.getElementById("ticket-form").reset();
+      document.getElementById("ticket-form").classList.remove("hidden");
+      document.getElementById("success-card").classList.add("hidden");
+    }
+
+    // 4. Ticket Lookup Handler
+    async function handleLookup(e) {
+      e.preventDefault();
+      const rawId = document.getElementById("lookup_id").value.trim().toUpperCase();
+      const ticketId = rawId.startsWith("TKT-") ? rawId : `TKT-${rawId.padStart(3, '0')}`;
+
+      const resBox = document.getElementById("lookup-result");
+      const errBox = document.getElementById("lookup-error");
+      resBox.classList.add("hidden");
+      errBox.classList.add("hidden");
+
+      try {
+        const res = await fetch(`/api/tickets/${ticketId}`);
+        if (!res.ok) {
+          errBox.classList.remove("hidden");
+          return;
+        }
+        const ticket = await res.json();
+
+        document.getElementById("lk-id").textContent = ticket.ticket_id;
+        document.getElementById("lk-subject").textContent = ticket.subject;
+        document.getElementById("lk-status").textContent = ticket.status;
+        document.getElementById("lk-date").textContent = `Created ${new Date(ticket.created_at).toLocaleDateString()}`;
+        document.getElementById("lk-summary").textContent = ticket.ai_summary || "Under review by support.";
+
+        // Status badge colors
+        const statusEl = document.getElementById("lk-status");
+        if (ticket.status === "Open") {
+          statusEl.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20";
+        } else if (ticket.status === "In Progress") {
+          statusEl.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+        } else {
+          statusEl.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        }
+
+        resBox.classList.remove("hidden");
+      } catch (err) {
+        errBox.classList.remove("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
