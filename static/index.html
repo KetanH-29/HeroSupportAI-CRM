@@ -202,7 +202,7 @@
                 <input type="text" id="lookup_id" required placeholder="e.g. TKT-001"
                        class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm font-mono text-white uppercase placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all">
                 <button type="submit" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition-all">
-                  Lookup
+                  Search
                 </button>
               </div>
             </form>
@@ -304,8 +304,14 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error("Failed to submit ticket");
         const data = await res.json();
+
+        if (!res.ok) {
+          if (data.detail && Array.isArray(data.detail)) {
+            throw new Error(data.detail.map(d => d.msg || d).join(", "));
+          }
+          throw new Error(data.detail || "Failed to submit ticket");
+        }
 
         // Show success
         document.getElementById("ticket-form").classList.add("hidden");

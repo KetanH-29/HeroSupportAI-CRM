@@ -8,6 +8,69 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // SYNCHRONOUS GUARD: Run before anything else to block rendering if not logged in
+    (function() {
+      if (!localStorage.getItem('herosupport_token')) {
+        window.location.replace('/login');
+      }
+      // Mark that dashboard page was accessed with valid token
+      sessionStorage.setItem('dashboard_accessed', 'true');
+    })();
+  </script>
+  <script>
+    // BFCache protection: Reload if returning to this page after logout
+    window.addEventListener('pageshow', function (event) {
+      const hasToken = localStorage.getItem('herosupport_token');
+      const wasAccessed = sessionStorage.getItem('dashboard_accessed');
+
+      // If this page was previously accessed but token is now gone, user logged out
+      if (wasAccessed && !hasToken) {
+        window.location.replace('/login');
+        return;
+      }
+
+      // If event.persisted is true, page was restored from BFCache - reload to verify auth
+      if (event.persisted) {
+        if (!hasToken) {
+          window.location.replace('/login');
+        } else {
+          // Token exists, but verify it's still valid
+          fetch('/api/auth/verify', {
+            headers: { 'Authorization': `Bearer ${hasToken}` }
+          }).then(res => {
+            if (!res.ok) {
+              localStorage.removeItem('herosupport_token');
+              localStorage.removeItem('herosupport_agent');
+              window.location.replace('/login');
+            }
+          }).catch(() => {
+            window.location.replace('/login');
+          });
+        }
+      }
+    });
+
+    async function handleLogout() {
+      const activeToken = localStorage.getItem('herosupport_token');
+      localStorage.removeItem('herosupport_token');
+      localStorage.removeItem('herosupport_agent');
+      sessionStorage.removeItem('dashboard_accessed'); // Clear the session flag
+
+      try {
+        if (activeToken) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${activeToken}` }
+          });
+        }
+      } catch (e) {
+        // Ignore network errors on logout
+      } finally {
+        window.location.replace('/login');
+      }
+    }
+  </script>
+  <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
@@ -96,6 +159,9 @@
             <button onclick="loadAllData()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-all flex items-center gap-1.5">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               <span>Refresh</span>
+            </button>
+            <button onclick="handleLogout()" title="Sign Out" class="p-2 rounded-xl bg-slate-900 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 transition-all flex items-center">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
@@ -381,7 +447,10 @@
     // 1. Fetch Tickets
     async function loadTickets() {
       try {
-        const res = await fetch('/api/tickets');
+        const token = localStorage.getItem('herosupport_token');
+        const res = await fetch('/api/tickets', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         allTickets = await res.json();
         renderTickets(allTickets);
       } catch (err) {
@@ -470,7 +539,10 @@
     // 2. Fetch AI Issue Detective
     async function loadAIDetective() {
       try {
-        const res = await fetch('/api/intelligence/issues');
+        const token = localStorage.getItem('herosupport_token');
+        const res = await fetch('/api/intelligence/issues', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
         currentClusterData = data;
 
@@ -492,7 +564,10 @@
     // 3. Fetch Master Analytics Payload & Render Charts
     async function loadAnalyticsPipeline() {
       try {
-        const res = await fetch('/api/analytics/all');
+        const token = localStorage.getItem('herosupport_token');
+        const res = await fetch('/api/analytics/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
 
         // Animate KPI Numbers using GSAP

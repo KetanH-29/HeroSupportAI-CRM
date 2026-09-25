@@ -72,7 +72,7 @@ Priority guidelines:
         result = json.loads(response.choices[0].message.content)
         return {
             "summary": result.get("summary", "Summary unavailable."),
-            "priority": result.get("priority", "Medium"),
+            "priority": result.get("priority", "Medium").upper(),
             "priority_reason": result.get("priority_reason", "Standard review needed.")
         }
 
@@ -81,7 +81,7 @@ Priority guidelines:
         # Safe fallback so ticket creation NEVER fails
         return {
             "summary": f"Customer reported: {subject[:100]}...",
-            "priority": "Medium",
+            "priority": "MEDIUM",
             "priority_reason": "Default priority assigned (AI service unavailable)."
         }
 

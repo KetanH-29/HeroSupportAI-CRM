@@ -10,16 +10,25 @@ This file contains:
 4. Database initialization on startup
 """
 
-from fastapi import FastAPI, HTTPException, Query
+import secrets
+from datetime import datetime, timedelta
+from typing import Optional, Dict
+
+from fastapi import FastAPI, HTTPException, Query, Header, Depends, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from datetime import datetime, timedelta
-from typing import Optional
 
 import database
 import ai_service
 import analytics
-from models import *
+from models import (
+    TicketCreate,
+    TicketUpdateRequest,
+    LoginRequest,
+    NoteResponse,
+    TicketSummaryResponse,
+    TicketDetailResponse
+)
 
 # ==========================================================
 # FASTAPI APP INITIALIZATION
@@ -33,6 +42,115 @@ app = FastAPI(
 
 # Serve static files (CSS, JS, images) from /static folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# ==========================================================
+# AGENT AUTHENTICATION STATE & HELPERS (Stdlib Token Store)
+# ==========================================================
+
+# Valid Demo Agent Accounts
+AGENT_CREDENTIALS = {
+    "agent@herosupport.ai": "agent123",
+    "admin@herosupport.ai": "admin123"
+}
+
+# In-memory session store: token -> {email, name, role, expires_at}
+ACTIVE_SESSIONS: Dict[str, dict] = {}
+
+
+def create_agent_session(email: str) -> str:
+    """Generates a secure random session token and caches session details."""
+    token = secrets.token_hex(24)
+    ACTIVE_SESSIONS[token] = {
+        "email": email,
+        "name": email.split("@")[0].capitalize(),
+        "role": "Support Engineer" if "admin" not in email else "Support Lead",
+        "created_at": datetime.now(),
+        "expires_at": datetime.now() + timedelta(days=7)
+    }
+    return token
+
+
+def verify_agent_token(authorization: Optional[str] = Header(None)) -> dict:
+    """
+    Dependency that enforces authentication for protected Agent endpoints.
+    Accepts: 'Authorization: Bearer <token>'
+    """
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required. Please log in to access agent tools."
+        )
+
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization scheme. Use 'Bearer <token>'."
+        )
+
+    session = ACTIVE_SESSIONS.get(token)
+    if not session or session["expires_at"] < datetime.now():
+        ACTIVE_SESSIONS.pop(token, None)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session expired or invalid. Please log in again."
+        )
+
+    return session
+
+# ==========================================================
+# AUTHENTICATION API ROUTES
+# ==========================================================
+
+@app.post("/api/auth/login", response_model=dict)
+def login(credentials: LoginRequest):
+    """
+    Authenticates a support agent and issues an access token.
+    Default demo credentials: agent@herosupport.ai / agent123
+    """
+    email = credentials.email.strip().lower()
+    expected_password = AGENT_CREDENTIALS.get(email)
+
+    if not expected_password or expected_password != credentials.password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid agent email or password. Use agent@herosupport.ai / agent123"
+        )
+
+    token = create_agent_session(email)
+    session = ACTIVE_SESSIONS[token]
+
+    return {
+        "success": True,
+        "token": token,
+        "agent": {
+            "email": session["email"],
+            "name": session["name"],
+            "role": session["role"]
+        }
+    }
+
+
+@app.get("/api/auth/verify", response_model=dict)
+def verify_session(agent: dict = Depends(verify_agent_token)):
+    """Verifies that the provided Bearer token is currently active."""
+    return {
+        "authenticated": True,
+        "agent": {
+            "email": agent["email"],
+            "name": agent["name"],
+            "role": agent["role"]
+        }
+    }
+
+
+@app.post("/api/auth/logout", response_model=dict)
+def logout(authorization: Optional[str] = Header(None)):
+    """Revokes the current agent token."""
+    if authorization:
+        _, _, token = authorization.partition(" ")
+        ACTIVE_SESSIONS.pop(token, None)
+    return {"success": True, "message": "Logged out successfully"}
 
 
 # ==========================================================
@@ -57,12 +175,22 @@ def landing_page():
     return FileResponse("static/index.html")
 
 
+@app.get("/login", include_in_schema=False)
+def login_page():
+    """Serves the Agent Login portal."""
+    return FileResponse("static/login.html")
+
+
 @app.get("/dashboard", include_in_schema=False)
 def dashboard_page():
     """
     Serves the main dashboard (ticket list) page.
     """
-    return FileResponse("static/dashboard.html")
+    response = FileResponse("static/dashboard.html")
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.get("/tickets/{ticket_id}", include_in_schema=False)
@@ -71,7 +199,11 @@ def ticket_detail_page(ticket_id: str):
     Serves the ticket detail page.
     The actual ticket data is loaded via JavaScript calling /api/tickets/{ticket_id}
     """
-    return FileResponse("static/ticket.html")
+    response = FileResponse("static/ticket.html")
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 # ==========================================================
@@ -133,14 +265,11 @@ def create_ticket(ticket: TicketCreate):
 @app.get("/api/tickets", response_model=list[TicketSummaryResponse])
 def get_all_tickets(
     status: Optional[str] = Query(None, description="Filter by status: Open, In Progress, Closed"),
-    search: Optional[str] = Query(None, description="Search across name, email, subject, description")
+    search: Optional[str] = Query(None, description="Search across name, email, subject, description"),
+    agent: dict = Depends(verify_agent_token)
 ):
     """
     Lists all tickets with optional filtering.
-
-    Query parameters:
-    - status: Filter by ticket status
-    - search: Search term (matches customer_name, email, subject, description)
     """
     conn = database.get_db_connection()
     cursor = conn.cursor()
@@ -184,9 +313,11 @@ def get_all_tickets(
 
 
 @app.get("/api/tickets/{ticket_id}", response_model=TicketDetailResponse)
-def get_ticket_detail(ticket_id: str):
+def get_ticket_detail(ticket_id: str, authorization: Optional[str] = Header(None)):
     """
     Returns full details of a single ticket including all notes.
+    Public endpoint for customers to track their tickets.
+    Agents get full details; customers get basic status only.
     """
     conn = database.get_db_connection()
     cursor = conn.cursor()
@@ -200,11 +331,22 @@ def get_ticket_detail(ticket_id: str):
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    # Get notes
-    notes = cursor.execute(
-        "SELECT * FROM notes WHERE ticket_id = ? ORDER BY created_at ASC",
-        (ticket_id,)
-    ).fetchall()
+    # Check if request is from authenticated agent
+    is_agent = False
+    if authorization:
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() == "bearer" and token:
+            session = ACTIVE_SESSIONS.get(token)
+            if session and session["expires_at"] >= datetime.now():
+                is_agent = True
+
+    # Get notes only for agents
+    notes = []
+    if is_agent:
+        notes = cursor.execute(
+            "SELECT * FROM notes WHERE ticket_id = ? ORDER BY created_at ASC",
+            (ticket_id,)
+        ).fetchall()
 
     conn.close()
 
@@ -234,13 +376,9 @@ def get_ticket_detail(ticket_id: str):
 
 
 @app.put("/api/tickets/{ticket_id}", response_model=dict)
-def update_ticket(ticket_id: str, update: dict):
+def update_ticket(ticket_id: str, update: dict, agent: dict = Depends(verify_agent_token)):
     """
     Updates a ticket's status and/or adds a note.
-
-    Body can contain:
-    - status: new status value
-    - note: note text to add
     """
     conn = database.get_db_connection()
     cursor = conn.cursor()
