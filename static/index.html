@@ -116,19 +116,19 @@
           </div>
 
           <!-- Submission Form -->
-          <form id="ticket-form" onsubmit="handleTicketSubmit(event)" class="space-y-4">
+          <form id="ticket-form" onsubmit="handleTicketSubmit(event)" class="space-y-4" autocomplete="off">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Full Name -->
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="customer_name">Your Full Name <span class="text-rose-400">*</span></label>
-                <input type="text" id="customer_name" required placeholder="e.g. Rahul Sharma"
+                <input type="text" id="customer_name" required placeholder="e.g. Rahul Sharma" autocomplete="off"
                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
               </div>
 
               <!-- Email Address -->
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="customer_email">Email Address <span class="text-rose-400">*</span></label>
-                <input type="email" id="customer_email" required placeholder="e.g. rahul@example.com"
+                <input type="email" id="customer_email" required placeholder="e.g. rahul@example.com" autocomplete="off"
                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
               </div>
             </div>
@@ -136,14 +136,14 @@
             <!-- Subject -->
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="subject">Issue Subject / Summary <span class="text-rose-400">*</span></label>
-              <input type="text" id="subject" required placeholder="e.g. Payment deducted via UPI but subscription not active"
+              <input type="text" id="subject" required placeholder="e.g. Payment deducted via UPI but subscription not active" autocomplete="off"
                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
             </div>
 
             <!-- Description -->
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="description">Detailed Description <span class="text-rose-400">*</span></label>
-              <textarea id="description" rows="4" required placeholder="Please provide details (transaction ID, steps taken, error messages, etc.)..."
+              <textarea id="description" rows="4" required placeholder="Please provide details (transaction ID, steps taken, error messages, etc.)..." autocomplete="off"
                         class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none"></textarea>
             </div>
 
@@ -197,9 +197,9 @@
               Already submitted a ticket? Enter your Ticket ID below to check live resolution status.
             </p>
 
-            <form onsubmit="handleLookup(event)" class="space-y-3">
+            <form onsubmit="handleLookup(event)" class="space-y-3" autocomplete="off">
               <div class="flex gap-2">
-                <input type="text" id="lookup_id" required placeholder="e.g. TKT-001"
+                <input type="text" id="lookup_id" required placeholder="e.g. TKT-001" autocomplete="off"
                        class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-sm font-mono text-white uppercase placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all">
                 <button type="submit" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition-all">
                   Search
