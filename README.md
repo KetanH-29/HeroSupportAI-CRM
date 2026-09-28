@@ -18,6 +18,12 @@ A full-stack web application for managing customer support tickets with:
 
 ---
 
+## Architecture Diagram
+
+Open **[ARCHITECTURE_DIAGRAM.html](ARCHITECTURE_DIAGRAM.html)** in your browser for an interactive visual of the system architecture. The diagram shows all components, connections, security layers, and data flow. You can zoom, pan, toggle dark/light theme, and export to PNG/SVG.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
